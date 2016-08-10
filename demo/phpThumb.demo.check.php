@@ -31,8 +31,7 @@ if (!include_once('../phpthumb.class.php')) {
 $phpThumb = new phpThumb();
 if (file_exists('../phpThumb.config.php') && include_once('../phpThumb.config.php')) {
 	foreach ($PHPTHUMB_CONFIG as $key => $value) {
-		$keyname = 'config_'.$key;
-		$phpThumb->setParameter($keyname, $value);
+		$phpThumb->setParameter('config_'.$key, $value);
 	}
 } else {
 	echo '<div style="color: red; border: 1px red dashed; font-weight: bold; padding: 10px; margin: 10px; display: inline-block;">Error reading ../phpThumb.config.php</div><br>';
@@ -92,7 +91,7 @@ foreach ($versions['raw'] as $key => $value) {
 	$versions['min'][$key]   = $min;
 	$versions['date'][$key]  = @mktime($hour, $min, 0, $month, $day, $year);
 }
-$downloadlatest = 'Download the latest version from <a href="http://phpthumb.sourceforge.net">http://phpthumb.sourceforge.net</a>';
+$downloadlatest = 'Download the latest version from <a href="https://github.com/JamesHeinrich/phpThumb/">https://github.com/JamesHeinrich/phpThumb/</a>';
 echo '<tr><th nowrap>Latest phpThumb version:</th><th colspan="2">'.$versions['raw']['latest'].'</th><td>'.$downloadlatest.'</td></tr>';
 echo '<tr><th nowrap>This phpThumb version:</th><th colspan="2" style="background-color: ';
 
@@ -141,6 +140,20 @@ if (file_exists('../phpThumb.config.php') && !file_exists('../phpThumb.config.ph
 	echo 'red;">"phpThumb.config.php" not found';
 }
 echo '</th><td>"phpThumb.config.php.default" that comes in the distribution must be renamed to "phpThumb.config.php" before phpThumb.php can be used. Avoid having both files present to minimize confusion.</td></tr>';
+
+
+echo '<tr><th>phpThumb.config.php<br>[disable_debug]</th>';
+echo '<th colspan="2" style="background-color: '.($PHPTHUMB_CONFIG['disable_debug'] ? 'lime' : 'red').'">'.($PHPTHUMB_CONFIG['disable_debug'] ? 'true' : 'false').'</th>';
+echo '<td>DO NOT DISABLE THIS ON ANY PUBLIC-ACCESSIBLE SERVER. Prevents phpThumb from displaying any information about your system. If true, phpThumbDebug and error messages will be disabled. If set to false (debug messages enabled) then debug mode will be FORCED -- ONLY debug output will be presented, no actual thumbnail (to avoid accidentally leaving debug mode enabled on a production server).</td></tr>';
+
+echo '<tr><th>phpThumb.config.php<br>[high_security_enabled]</th>';
+echo '<th colspan="2" style="background-color: '.($PHPTHUMB_CONFIG['high_security_enabled'] ? 'lime' : 'red').'">'.($PHPTHUMB_CONFIG['high_security_enabled'] ? 'true' : 'false').'</th>';
+echo '<td>DO NOT DISABLE THIS ON ANY PUBLIC-ACCESSIBLE SERVER. If disabled, your server is more vulnerable to hacking attempts, both on your server and via your server to other servers. When enabled, requires "high_security_password" set to be set and requires the use of phpThumbURL() function (at the bottom of phpThumb.config.php) to generate hashed URLs.</td></tr>';
+
+echo '<tr><th>phpThumb.config.php<br>[high_security_password]</th>';
+$password_complexity = phpthumb_functions::PasswordStrength($PHPTHUMB_CONFIG['high_security_password']);
+echo '<th colspan="2" style="background-color: '.(($password_complexity >= 20) ? 'lime' : ((strlen($PHPTHUMB_CONFIG['high_security_password']) > 0) ? 'orange' : 'red')).'">'.(($password_complexity >= 20) ? 'sufficiently complex' : ((strlen($PHPTHUMB_CONFIG['high_security_password']) > 0) ? 'not complex enough' : 'not set')).'</th>';
+echo '<td>DO NOT DISABLE THIS ON ANY PUBLIC-ACCESSIBLE SERVER. If disabled, your server is more vulnerable to hacking attempts, both on your server and via your server to other servers. When enabled, requires "high_security_password" set to be set and requires the use of phpThumbURL() function (at the bottom of phpThumb.config.php) to generate hashed URLs.</td></tr>';
 
 
 echo '<tr><th>cache directory:</th><th colspan="2">';
@@ -209,7 +222,7 @@ if (phpthumb_functions::version_compare_replacement(phpversion(), '5.0.0', '>=')
 	echo 'red';
 }
 echo ';">'.phpversion();
-echo '</th><td>PHP5 is ideal (support for numerous built-in filters which are much faster than my code).<br>PHP v4.4.2 contains a bug in fopen over HTTP (phpThumb has a workaround)<br>PHP v4.3.2+ supports ImageSaveAlpha which is required for proper PNG/ICO output.<br>ImageRotate requires PHP v4.3.0+ (but buggy before v4.3.3).<br>EXIF thumbnail extraction requires PHP v4.2.0+.<br>Most things will work back to PHP v4.1.0, and mostly (perhaps buggy) back to v4.0.6, but no guarantees for any version older than that.</td></tr>';
+echo '</th><td>PHP5 is ideal (support for numerous built-in filters which are much faster than my code).<br>PHP v4.4.2 contains a bug in fopen over HTTP (phpThumb has a workaround)<br>PHP v4.3.2+ supports imagesavealpha which is required for proper PNG/ICO output.<br>imagerotate requires PHP v4.3.0+ (but buggy before v4.3.3).<br>EXIF thumbnail extraction requires PHP v4.2.0+.<br>Most things will work back to PHP v4.1.0, and mostly (perhaps buggy) back to v4.0.6, but no guarantees for any version older than that.</td></tr>';
 
 
 echo '<tr><th>GD version:</th><th colspan="2" style="background-color: ';
@@ -225,7 +238,7 @@ if ($ServerInfo['gd_numeric'] >= 2) {
 	echo 'red';
 }
 echo ';">'.(!empty($ServerInfo['gd_string']) ? $ServerInfo['gd_string'] : 'n/a');
-echo '</th><td>GD2-bundled version is ideal.<br>GD2 (non-bundled) is second choice, but there are a number of bugs in the non-bundled version. ImageRotate is only available in the bundled version of GD2.<br>GD1 will also (mostly) work, at much-reduced image quality and several features disabled. phpThumb can perform most operations with ImageMagick only, even if GD is not available.</td></tr>';
+echo '</th><td>GD2-bundled version is ideal.<br>GD2 (non-bundled) is second choice, but there are a number of bugs in the non-bundled version. imagerotate is only available in the bundled version of GD2.<br>GD1 will also (mostly) work, at much-reduced image quality and several features disabled. phpThumb can perform most operations with ImageMagick only, even if GD is not available.</td></tr>';
 
 
 $IMreleaseDate = 0;
@@ -386,7 +399,7 @@ echo '<tr style="background-color: #EEEEEE;"><th colspan="4">&nbsp;</th></tr>';
 echo '<tr style="background-color: #EEEEEE;"><th>function_exists:</th><th colspan="2">Value</th><th>Comments</th></tr>';
 
 $FunctionsExist = array(
-	'ImageRotate'           => array('orange',     'required for "ra" and "ar" filters.'),
+	'imagerotate'           => array('orange',     'required for "ra" and "ar" filters.'),
 	'exif_read_data'        => array('yellow',     'required for "ar" filter.'),
 	'exif_thumbnail'        => array('yellow',     'required to extract EXIF thumbnails.'),
 	'memory_get_usage'      => array('lightgreen', 'mostly used for troubleshooting.'),
@@ -395,15 +408,15 @@ $FunctionsExist = array(
 	'file_put_contents'     => array('darkgreen',  'available in PHP v5.0.0+, internal workaround available'),
 	'is_executable'         => array('yellow',     'available in PHP3, except only PHP5 for Windows. poor internal workaround available'),
 	'gd_info'               => array('olive',      'available in PHP v4.3.0+ (with bundled GD2), internal workaround available'),
-	'ImageTypes'            => array('red',        'required for GD image output.'),
-	'ImageCreateFromJPEG'   => array('orange',     'required for JPEG source images using GD.'),
-	'ImageCreateFromGIF'    => array('yellow',     'useful for GIF source images using GD.'),
-	'ImageCreateFromPNG'    => array('orange',     'required for PNG source images using GD and other source image formats using ImageMagick.'),
-	'ImageCreateFromWBMP'   => array('yellow',     'required for WBMP source images using GD.'),
-	'ImageCreateFromString' => array('orange',     'required for HTTP and non-file image sources.'),
-	'ImageCreateTrueColor'  => array('orange',     'required for all non-ImageMagick filters.'),
-	'ImageIsTrueColor'      => array('olive',      'available in PHP v4.3.2+ with GD v2.0.1+'),
-	'ImageFilter'           => array('yellow',     'PHP5 only. Required for some filters (but most can use ImageMagick instead)'),
+	'imagetypes'            => array('red',        'required for GD image output.'),
+	'imagecreatefromjpeg'   => array('orange',     'required for JPEG source images using GD.'),
+	'imagecreatefromgif'    => array('yellow',     'useful for GIF source images using GD.'),
+	'imagecreatefrompng'    => array('orange',     'required for PNG source images using GD and other source image formats using ImageMagick.'),
+	'imagecreatefromwbmp'   => array('yellow',     'required for WBMP source images using GD.'),
+	'imagecreatefromstring' => array('orange',     'required for HTTP and non-file image sources.'),
+	'imagecreatetruecolor'  => array('orange',     'required for all non-ImageMagick filters.'),
+	'imageistruecolor'      => array('olive',      'available in PHP v4.3.2+ with GD v2.0.1+'),
+	'imagefilter'           => array('yellow',     'PHP5 only. Required for some filters (but most can use ImageMagick instead)'),
 );
 foreach ($FunctionsExist as $function => $details) {
 	list($color, $description) = $details;
